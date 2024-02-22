@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,12 +28,16 @@ func main() {
 	// Configure WebSocket route
 	http.HandleFunc("/ws", handleConnections)
 
-	// Start listening for incoming chat messages
-	go handleMessages()
+	// Add CORS middleware allowing all origins, methods, and headers
+	cors := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
+	)
 
-	// Start the server on localhost port 8000 and log any errors
+	// Start listening for incoming chat messages with CORS middleware
 	log.Println("Server started on :8000")
-	err := http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":8000", cors(http.DefaultServeMux))
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
