@@ -1,6 +1,6 @@
 module cc_editor_server
 
-go 1.22.0
+go 1.22
 
 require (
 	github.com/gorilla/handlers v1.5.2
