@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 )
@@ -13,9 +12,9 @@ var broadcast = make(chan Message)           // broadcast channel
 
 // Configure the WebSocket upgrader
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+    CheckOrigin: func(r *http.Request) bool {
+        return true
+    },
 }
 
 // Define the message structure
@@ -27,15 +26,15 @@ type Message struct {
 func main() {
 	// Configure WebSocket route
 	http.HandleFunc("/ws", handleConnections)
-
-	// Add CORS middleware allowing all origins, methods, and headers
 	cors := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type"}),
 	)
+	// Start listening for incoming chat messages
+	go handleMessages()
 
-	// Start listening for incoming chat messages with CORS middleware
+	// Start the server on localhost port 8000 and log any errors
 	log.Println("Server started on :8000")
 	err := http.ListenAndServe(":8000", cors(http.DefaultServeMux))
 	if err != nil {
