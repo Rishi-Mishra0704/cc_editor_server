@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 )
@@ -12,15 +13,14 @@ var broadcast = make(chan Message)           // broadcast channel
 
 // Configure the WebSocket upgrader
 var upgrader = websocket.Upgrader{
-    CheckOrigin: func(r *http.Request) bool {
-        return true
-    },
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 // Define the message structure
 type Message struct {
-	Username string `json:"username"`
-	Content  string `json:"content"`
+	Content string `json:"content"`
 }
 
 func main() {
