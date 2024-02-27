@@ -9,7 +9,7 @@ import (
 )
 
 var clients = make(map[*websocket.Conn]bool) // connected clients
-var broadcast = make(chan Message)           // broadcast channel
+var broadcast = make(chan File)              // broadcast channel
 
 // Configure the WebSocket upgrader
 var upgrader = websocket.Upgrader{
@@ -19,8 +19,9 @@ var upgrader = websocket.Upgrader{
 }
 
 // Define the message structure
-type Message struct {
-	Content string `json:"content"`
+type File struct {
+	Content       string `json:"content"`
+	FileExtension string `json:"fileExtension"`
 }
 
 func main() {
@@ -54,16 +55,16 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	clients[ws] = true
 
 	for {
-		var msg Message
+		var file File
 		// Read in a new message as JSON and map it to a Message object
-		err := ws.ReadJSON(&msg)
+		err := ws.ReadJSON(&file)
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(clients, ws)
 			break
 		}
 		// Send the newly received message to the broadcast channel
-		broadcast <- msg
+		broadcast <- file
 	}
 }
 
