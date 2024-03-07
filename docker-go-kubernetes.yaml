@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cc-editor-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cc-editor-server
+  template:
+    metadata:
+      labels:
+        app: cc-editor-server
+    spec:
+      containers:
+      - name: cc-editor-server
+        image: rishimishra0704/cc_editor_server
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cc-editor-service
+spec:
+  selector:
+    app: cc-editor-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: LoadBalancer
