@@ -1,11 +1,11 @@
 package main
 
 import (
+	"cc_editor_server/sockets"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/handlers"
-	"github.com/gorilla/websocket"
 )
 
 /*
@@ -38,78 +38,21 @@ import (
    - Sets up Cross-Origin Resource Sharing (CORS) to allow requests from any origin, with specific allowed methods and headers.
 */
 
-var clients = make(map[*websocket.Conn]bool) // connected clients
-var broadcast = make(chan File)              // broadcast channel
-
-// Configure the WebSocket upgrader
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-// Define the message structure
-type File struct {
-	Content       string `json:"content"`
-	FileExtension string `json:"fileExtension"`
-}
-
 func main() {
 	// Configure WebSocket route
-	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/ws", sockets.HandleConnections)
 	cors := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type"}),
 	)
 	// Start listening for incoming chat messages
-	go handleMessages()
+	go sockets.HandleMessages()
 
 	// Start the server on localhost port 8000 and log any errors
 	log.Println("Server started on :8000")
 	err := http.ListenAndServe(":8000", cors(http.DefaultServeMux))
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
-	}
-}
-
-func handleConnections(w http.ResponseWriter, r *http.Request) {
-	// Upgrade initial GET request to a WebSocket
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ws.Close()
-
-	// Register new client
-	clients[ws] = true
-
-	for {
-		var file File
-		// Read in a new message as JSON and map it to a Message object
-		err := ws.ReadJSON(&file)
-		if err != nil {
-			log.Printf("error: %v", err)
-			delete(clients, ws)
-			break
-		}
-		// Send the newly received message to the broadcast channel
-		broadcast <- file
-	}
-}
-
-func handleMessages() {
-	for {
-		// Grab the next message from the broadcast channel
-		msg := <-broadcast
-		// Send it out to every client that is currently connected
-		for client := range clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				log.Printf("error: %v", err)
-				client.Close()
-				delete(clients, client)
-			}
-		}
 	}
 }
