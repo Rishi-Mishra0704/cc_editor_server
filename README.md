@@ -17,7 +17,7 @@
 
 <!-- PROJECT DESCRIPTION -->
 
-# 📖 [Vendor-Management-System] <a name="about-project"></a>
+# 📖 [CC_Collaboration_server] <a name="about-project"></a>
 
 > This Go application sets up a WebSocket server to enable real-time collaboration on a code editor. It utilizes the Gorilla WebSocket library to manage WebSocket connections and facilitate communication between clients.
 
